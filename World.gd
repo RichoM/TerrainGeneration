@@ -1,14 +1,12 @@
 extends Spatial
 
+const max_chunks_per_frame = 1
 const chunk_size = 64
 var chunk_amount = 4
 
 var noise
 var chunks = {}
 var unready_chunks = {}
-var thread
-
-var chunks_added = 0
 
 func _ready():
 	randomize()
@@ -16,35 +14,23 @@ func _ready():
 	noise.seed = randi()
 	noise.octaves = 6
 	noise.period = 80
-	
-	thread = Thread.new()
+
 	
 func add_chunk(x, z):
 	var key = str(x) + "," + str(z)
-	if chunks.has(key) or unready_chunks.has(key):
-		return
+	if chunks.has(key): return false
+	load_chunk(x, z)
+	return true
 		
-	if not thread.is_active():
-		chunks_added = chunks_added + 1
-		thread.start(self, "load_chunk", [thread, x, z])
-		unready_chunks[key] = 1
-		
-func load_chunk(arr):
-	var thread = arr[0]
-	var x = arr[1]
-	var z = arr[2]
-	
+func load_chunk(x, z):
 	var chunk = Chunk.new(noise, x * chunk_size, z * chunk_size, chunk_size)
 	chunk.translation = Vector3(x * chunk_size, 0, z * chunk_size)
+	load_done(chunk)
 	
-	call_deferred("load_done", chunk, thread)
-	
-func load_done(chunk, thread : Thread):
-	add_child(chunk)
+func load_done(chunk):
 	var key = str(chunk.x / chunk_size) + "," + str(chunk.z / chunk_size)
 	chunks[key] = chunk
-	unready_chunks.erase(key)
-	thread.wait_to_finish()
+	add_child(chunk)
 	
 func get_chunk(x, z):
 	var key = str(x) + "," + str(z)
@@ -58,17 +44,19 @@ func _process(delta):
 	reset_chunks()
 	
 func update_chunks():
-	chunks_added = 0
 	var player_translation = $Player.translation
 	var p_x = int(player_translation.x) / chunk_size
 	var p_z = int(player_translation.z) / chunk_size
 	
+	var chunks_added = 0
 	for x in range(p_x - chunk_amount * 0.5, p_x + chunk_amount * 0.5):
 		for z in range(p_z - chunk_amount * 0.5, p_z + chunk_amount * 0.5):
-			add_chunk(x, z)
+			if chunks_added < max_chunks_per_frame and add_chunk(x, z):
+				chunks_added += 1
 			var chunk = get_chunk(x, z)
 			if chunk != null:
 				chunk.should_remove = false
+					
 				
 	if chunks_added == 0 and chunk_amount < 16:
 		chunk_amount = chunk_amount * 2
