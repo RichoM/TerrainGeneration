@@ -1,12 +1,14 @@
 extends Spatial
 
 const chunk_size = 64
-const chunk_amount = 16
+var chunk_amount = 4
 
 var noise
 var chunks = {}
 var unready_chunks = {}
 var thread
+
+var chunks_added = 0
 
 func _ready():
 	randomize()
@@ -23,6 +25,7 @@ func add_chunk(x, z):
 		return
 		
 	if not thread.is_active():
+		chunks_added = chunks_added + 1
 		thread.start(self, "load_chunk", [thread, x, z])
 		unready_chunks[key] = 1
 		
@@ -55,6 +58,7 @@ func _process(delta):
 	reset_chunks()
 	
 func update_chunks():
+	chunks_added = 0
 	var player_translation = $Player.translation
 	var p_x = int(player_translation.x) / chunk_size
 	var p_z = int(player_translation.z) / chunk_size
@@ -65,6 +69,9 @@ func update_chunks():
 			var chunk = get_chunk(x, z)
 			if chunk != null:
 				chunk.should_remove = false
+				
+	if chunks_added == 0 and chunk_amount < 16:
+		chunk_amount = chunk_amount * 2
 	
 func clean_up_chunks():
 	for key in chunks:

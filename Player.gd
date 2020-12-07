@@ -1,9 +1,10 @@
 extends KinematicBody
 
-const GRAVITY = -9.81
+const GRAVITY = -24.8 * 5
 var vel = Vector3()
-const MAX_SPEED = 20 * 10
-const JUMP_SPEED = 18
+var running = false
+const MAX_SPEED = 40
+const JUMP_SPEED = GRAVITY * -1
 const ACCEL = 4.5
 
 var dir = Vector3()
@@ -20,7 +21,7 @@ func _ready():
 	camera = $Rotation_Helper/Camera
 	rotation_helper = $Rotation_Helper
 
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	#Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 func _physics_process(delta):
 	process_input(delta)
@@ -43,12 +44,22 @@ func process_input(delta):
 		input_movement_vector.x -= 1
 	if Input.is_action_pressed("movement_right"):
 		input_movement_vector.x += 1
+	
+	running = Input.is_action_pressed("movement_run")
+	
 
 	input_movement_vector = input_movement_vector.normalized()
-
+	
 	# Basis vectors are already normalized.
 	dir += -cam_xform.basis.z * input_movement_vector.y
 	dir += cam_xform.basis.x * input_movement_vector.x
+	# ----------------------------------
+
+	# ----------------------------------
+	# Jumping
+	if is_on_floor():
+		if Input.is_action_just_pressed("movement_jump"):
+			vel.y = JUMP_SPEED
 	# ----------------------------------
 
 	# ----------------------------------
@@ -64,14 +75,16 @@ func process_movement(delta):
 	dir.y = 0
 	dir = dir.normalized()
 
-	#vel.y += delta * GRAVITY
-	
+	vel.y += delta * GRAVITY
+
 	var hvel = vel
 	hvel.y = 0
 
 	var target = dir
 	target *= MAX_SPEED
-
+	if running:
+		target *= 5
+	
 	var accel
 	if dir.dot(hvel) > 0:
 		accel = ACCEL
@@ -81,6 +94,7 @@ func process_movement(delta):
 	hvel = hvel.linear_interpolate(target, accel * delta)
 	vel.x = hvel.x
 	vel.z = hvel.z
+	
 	vel = move_and_slide(vel, Vector3(0, 1, 0), 0.05, 4, deg2rad(MAX_SLOPE_ANGLE))
 
 func _input(event):
