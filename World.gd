@@ -1,6 +1,7 @@
 extends Spatial
 
-const max_chunks_per_frame = 1
+const max_chunks_per_frame = 2
+const max_chunks_total = 16
 const chunk_size = 64
 var chunk_amount = 4
 
@@ -58,8 +59,8 @@ func update_chunks():
 				chunk.should_remove = false
 					
 				
-	if chunks_added == 0 and chunk_amount < 16:
-		chunk_amount = chunk_amount * 2
+	if chunks_added == 0 and chunk_amount < max_chunks_total:
+		chunk_amount = chunk_amount + 2
 	
 func clean_up_chunks():
 	for key in chunks:

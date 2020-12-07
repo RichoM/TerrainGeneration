@@ -45,6 +45,6 @@ func generate_chunk():
 	mesh_instance = MeshInstance.new()
 	mesh_instance.mesh = surface_tool.commit()
 	mesh_instance.create_trimesh_collision()
-	#mesh_instance.cast_shadow = GeometryInstance.SHADOW_CASTING_SETTING_OFF
+	mesh_instance.cast_shadow = GeometryInstance.SHADOW_CASTING_SETTING_OFF
 	mesh_instance.set_surface_material(0, load("res://terrain.tres"))
 	add_child(mesh_instance)
