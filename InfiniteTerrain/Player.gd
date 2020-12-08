@@ -21,7 +21,7 @@ func _ready():
 	camera = $Rotation_Helper/Camera
 	rotation_helper = $Rotation_Helper
 
-	#Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 func _physics_process(delta):
 	process_input(delta)

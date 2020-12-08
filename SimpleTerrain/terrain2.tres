@@ -1,0 +1,13 @@
+[gd_resource type="SpatialMaterial" load_steps=3 format=2]
+
+[ext_resource path="res://mossy_rock_1k_jpg/mossy_rock_nor_1k.jpg" type="Texture" id=2]
+[ext_resource path="res://mossy_rock_1k_jpg/mossy_rock_diff_1k.jpg" type="Texture" id=3]
+
+[resource]
+albedo_color = Color( 0.262745, 0.156863, 0.00784314, 1 )
+albedo_texture = ExtResource( 3 )
+metallic = 1.0
+metallic_specular = 1.0
+normal_enabled = true
+normal_scale = 16.0
+normal_texture = ExtResource( 2 )
